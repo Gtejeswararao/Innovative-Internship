@@ -1,0 +1,115 @@
+1. City with highest total revenue from Gold members =>
+gold_city_revenue = final_dataset[final_dataset['membership'] == 'Gold'] \
+    .groupby('city')['total_amount'].sum().sort_values(ascending=False)
+print(gold_city_revenue.head(1))
+
+2. Cuisine with highest average order value =>
+cuisine_avg_order = final_dataset.groupby('cuisine')['total_amount'].mean().sort_values(ascending=False)
+print(cuisine_avg_order.head(1))
+
+3. Distinct users with > ₹1000 total orders =>
+user_totals = final_dataset.groupby('user_id')['total_amount'].sum()
+high_value_users = user_totals[user_totals > 1000].nunique()
+print(high_value_users)
+
+4. Restaurant rating range with highest revenue =>
+def rating_bucket(r):
+    if 3.0 <= r <= 3.5: return "3.0–3.5"
+    elif 3.6 <= r <= 4.0: return "3.6–4.0"
+    elif 4.1 <= r <= 4.5: return "4.1–4.5"
+    elif 4.6 <= r <= 5.0: return "4.6–5.0"
+
+final_dataset['rating_range'] = final_dataset['rating'].apply(rating_bucket)
+rating_revenue = final_dataset.groupby('rating_range')['total_amount'].sum().sort_values(ascending=False)
+print(rating_revenue.head(1))
+
+5. Gold members – city with highest average order value =>
+gold_avg_city = final_dataset[final_dataset['membership'] == 'Gold'] \
+    .groupby('city')['total_amount'].mean().sort_values(ascending=False)
+print(gold_avg_city.head(1))
+
+6. Cuisine with lowest distinct restaurants but significant revenue =>
+cuisine_stats = final_dataset.groupby('cuisine').agg({
+    'restaurant_id':'nunique',
+    'total_amount':'sum'
+}).sort_values('restaurant_id')
+print(cuisine_stats)
+
+7. Percentage of orders by Gold members =>
+gold_orders = final_dataset[final_dataset['membership'] == 'Gold'].shape[0]
+total_orders = final_dataset.shape[0]
+percentage = round((gold_orders / total_orders) * 100)
+print(percentage)
+
+8. Restaurant with highest avg order value but <20 orders =>
+restaurant_stats = final_dataset.groupby('restaurant_name').agg({
+    'total_amount':'mean',
+    'order_id':'count'
+})
+filtered = restaurant_stats[restaurant_stats['order_id'] < 20]
+print(filtered.sort_values('total_amount', ascending=False).head(1))
+
+9. Combination contributing highest revenue =>
+combo_revenue = final_dataset.groupby(['membership','cuisine'])['total_amount'].sum().sort_values(ascending=False)
+print(combo_revenue.head(1))
+
+10. Quarter with highest revenue =>
+final_dataset['order_date'] = pd.to_datetime(final_dataset['order_date'])
+final_dataset['quarter'] = final_dataset['order_date'].dt.to_period('Q')
+quarter_revenue = final_dataset.groupby('quarter')['total_amount'].sum().sort_values(ascending=False)
+print(quarter_revenue.head(1))
+
+Numerical Answers
+
+1. Total orders placed by users with Gold membership =>
+gold_orders_count = final_dataset[final_dataset['membership'] == 'Gold'].shape[0]
+print("Total Gold orders:", gold_orders_count)
+
+2. Total revenue from Hyderabad city (rounded to nearest integer) =>
+hyd_revenue = final_dataset[final_dataset['city'] == 'Hyderabad']['total_amount'].sum()
+print("Hyderabad revenue:", round(hyd_revenue))
+
+3. Distinct users who placed at least one order =>
+distinct_users = final_dataset['user_id'].nunique()
+print("Distinct users:", distinct_users)
+
+4. Average order value for Gold members (rounded to 2 decimals) =>
+gold_avg_order_value = final_dataset[final_dataset['membership'] == 'Gold']['total_amount'].mean()
+print("Gold average order value:", round(gold_avg_order_value, 2))
+
+5. Orders placed for restaurants with rating ≥ 4.5 =>
+high_rating_orders = final_dataset[final_dataset['rating'] >= 4.5].shape[0]
+print("Orders with rating ≥ 4.5:", high_rating_orders)
+
+6. Orders placed in the top revenue city among Gold members only =>
+gold_city_revenue = final_dataset[final_dataset['membership'] == 'Gold'] \
+    .groupby('city')['total_amount'].sum().sort_values(ascending=False)
+
+top_gold_city = gold_city_revenue.idxmax()
+
+orders_in_top_gold_city = final_dataset[
+    (final_dataset['membership'] == 'Gold') & (final_dataset['city'] == top_gold_city)
+].shape[0]
+print(f"Top Gold city: {top_gold_city}, Orders:", orders_in_top_gold_city)
+
+
+
+Fill in the blanks:
+
+This section contains fill-in-the-blank questions. Write the correct answer based on the given datasets.  
+The column used to join orders.csv and users.json is __user_id________.
+The dataset containing cuisine and rating information is stored in __SQL________ format.
+The total number of rows in the final merged dataset is ____orders.csv______.
+If a user has no matching record in users.json, the merged values will be __NaN________.
+The Pandas function used to combine datasets based on a key is __merge()________.
+The column membership in the final dataset originates from the __users.json________ file.  
+The join key used to combine orders data with restaurant details is __restuarant_id________.  
+The column that helps identify the type of food served by a restaurant is __cuisine________.  
+If a user places multiple orders, their personal details appear _multiple times_________ times in the final merged dataset.
+
+
+The column that helps identify the type of food served by a restaurant is  
+→ cuisine
+
+If a user places multiple orders, their personal details appear  
+→ multiple times (once for each order in the merged dataset)
